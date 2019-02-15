@@ -1,12 +1,31 @@
 package genutil
 
-import "go/ast"
+import (
+	"go/ast"
+	"go/parser"
+)
 
-type AstNodeFilter func(goFile ast.File) []ast.Node
+type AstNodeFilter func(node ast.Node) bool
 
-func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) ([]ast.Node, error) {
-	var nodes []ast.Node
-	return nodes, nil
+func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast.Node, err error) {
+	for _, node := range unfiltered {
+		if filter(node) {
+			filtered = append(filtered, node)
+		}
+	}
+	return
+}
+func FilterAstNodesFromArgs(filter AstNodeFilter) ([]ast.Node, error) {
+	pkgs, err := PackagesFromArgs()
+	if err != nil {
+		return nil, err
+	}
+
+	return FilterAstNodesFromPkgs(filter, pkgs)
+}
+
+func FilterAstNodesFromFile(filter AstNodeFilter, file ast.File) ([]ast.Node, error) {
+	return FilterAstNodes(filter, file.Decls.([]ast.Node))
 }
 
 func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]ast.Node, error) {
@@ -18,11 +37,15 @@ func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]ast
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromArgs(filter AstNodeFilter) ([]ast.Node, error) {
-	pkgs, err := PackagesFromArgs()
-	if err != nil {
-		return nil, err
+func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []ast.Node, err error) {
+	mode := parser.ParseComments
+	for _, pkg := range pkgs.pkgs {
+		for _, goFile := range pkg.GoFiles {
+			file, err := parser.ParseFile(pkgs.FileSet(), goFile, nil, mode)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-
-	return FilterAstNodesFromPkgs(filter, pkgs)
+	return
 }
