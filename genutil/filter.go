@@ -24,8 +24,12 @@ func FilterAstNodesFromArgs(filter AstNodeFilter) ([]ast.Node, error) {
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromFile(filter AstNodeFilter, file ast.File) ([]ast.Node, error) {
-	return FilterAstNodes(filter, file.Decls.([]ast.Node))
+func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) ([]ast.Node, error) {
+	var decls []ast.Node
+	for _, decl := range file.Decls {
+		decls = append(decls, decl)
+	}
+	return FilterAstNodes(filter, decls)
 }
 
 func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]ast.Node, error) {
@@ -45,6 +49,11 @@ func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []ast.Nod
 			if err != nil {
 				return nil, err
 			}
+			nodes, err := FilterAstNodesFromFile(filter, file)
+			if err != nil {
+				return nil, err
+			}
+			filtered = append(filtered, nodes...)
 		}
 	}
 	return
