@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func App() (app string) {
+func App() string {
 	return os.Args[0]
 }
 
