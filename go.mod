@@ -1,4 +1,4 @@
-module github.com/selesy/go-genutil
+module github.com/selesy/go-genutil/pkg
 
 require (
 	github.com/sirupsen/logrus v1.3.0
