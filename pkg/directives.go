@@ -21,12 +21,12 @@ var DefaultConfig = Config{
 	ValueSeparator:      ",",
 }
 
-func CommentGroup(decl *ast.GenDecl, prefix string, cfg Config) (Directives, error) {
+func CommentGroup(node *ast.GenDecl, prefix string, cfg Config) (Directives, error) {
 	d := Directives(make(map[string][]string))
-	if decl.Doc == nil {
+	if node.Doc == nil {
 		return d, nil
 	}
-	for _, c := range decl.Doc.List {
+	for _, c := range node.Doc.List {
 		t := c.Text[2:] // Skip over // or /*
 		if !strings.HasPrefix(t, prefix) {
 			continue
@@ -51,8 +51,13 @@ func CommentGroupWithDefaultConfig(node *ast.GenDecl, prefix string) (Directives
 	return CommentGroup(node, prefix, DefaultConfig)
 }
 
-func StructFieldTags(node *ast.StructType, prefix string) (Directives, error) {
-	return nil, nil
+func StructFieldTags(node *ast.StructType, prefix string, cfg Config) (Directives, error) {
+	d := Directives(make(map[string][]string))
+	return d, nil
+}
+
+func StructFieldTagsWithDefaultConfig(node *ast.StructType, prefix string) (Directives, error) {
+	return StructFieldTags(node, prefix, DefaultConfig)
 }
 
 // func blah(s *ast.StructType, prefix string) []string {
