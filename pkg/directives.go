@@ -1,7 +1,6 @@
 package genutil
 
 import (
-	"fmt"
 	"go/ast"
 	"strings"
 )
@@ -32,6 +31,10 @@ func (d Directives) Merge(directives ...Directives) {
 	}
 }
 
+func NewDirectives() Directives {
+	return Directives(make(map[string][]string))
+}
+
 type Config struct {
 	KeywordSeparator    string
 	KeyValueSeparator   string
@@ -47,7 +50,7 @@ var DefaultConfig = Config{
 }
 
 func CommentGroup(node *ast.GenDecl, prefix string, cfg Config) (Directives, error) {
-	d := Directives(make(map[string][]string))
+	d := NewDirectives()
 	if node.Doc == nil {
 		return d, nil
 	}
@@ -72,40 +75,49 @@ func CommentGroupWithDefaultConfig(node *ast.GenDecl, prefix string) (Directives
 	return CommentGroup(node, prefix, DefaultConfig)
 }
 
-func structFieldTagDirectives(field ast.Field, prefix string) Directives {
-	d := Directives(make(map[string][]string))
-	for _, tag := range strings.Split(field.Tag.Value, "") {
-		idx := strings.Index(tag, ":")
-		key, val := tag[:idx], tag[idx:]
+func identToString(idents ...*ast.Ident) []string {
+	var names []string
+	for _, ident := range idents {
+		names = append(names, ident.Name)
+	}
+	return names
+}
+
+func tagKeyVals(tag string) (string, []string) {
+	idx := strings.Index(tag, ":")
+	key, val := tag[:idx], tag[idx:]
+	val = strings.Trim(val, "\"")
+	return key, strings.Split(val, ",")
+}
+
+func structFieldTags(field *ast.Field, prefix string) Directives {
+	d := NewDirectives()
+	for _, tag := range strings.Split(field.Tag.Value, " ") {
+		key, vals := tagKeyVals(tag)
 		if key == prefix {
-			val = strings.Trim(val, "\"")
-			for _, v := range strings.Split(val, ",") {
-				fmt.Println("v: ", v)
+			for _, val := range vals {
+				d[val] = identToString(field.Names...)
 			}
-			break
+
 		}
 	}
 	return d
 }
 
 func StructFieldTags(node *ast.StructType, prefix string, cfg Config) (Directives, error) {
-	d := Directives(make(map[string][]string))
+	d := NewDirectives()
 	if node.Fields == nil {
 		return d, nil
 	}
-	// for _, f := range node.FieldList.List {
-	// 	t := f.V
-	// }
+	for _, f := range node.Fields.List {
+		d.Merge(structFieldTags(f, prefix))
+	}
 	return d, nil
 }
 
 func StructFieldTagsWithDefaultConfig(node *ast.StructType, prefix string) (Directives, error) {
 	return StructFieldTags(node, prefix, DefaultConfig)
 }
-
-// func blah(s *ast.StructType, prefix string) []string {
-// 	return nil
-// }
 
 func (d Directives) UniqueDirective(node *ast.Node, suffix string) (string, error) {
 	var v string
