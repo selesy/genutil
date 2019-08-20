@@ -21,7 +21,7 @@ func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast
 	}
 	return
 }
-func FilterAstNodesFromArgs(filter AstNodeFilter) ([]FilterMatch, error) {
+func FilterAstNodesFromArgs(filter AstNodeFilter) ([]*FilterMatch, error) {
 	pkgs, err := PackagesFromArgs()
 	if err != nil {
 		return nil, err
@@ -30,13 +30,13 @@ func FilterAstNodesFromArgs(filter AstNodeFilter) ([]FilterMatch, error) {
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) (matches []FilterMatch) {
+func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) (matches []*FilterMatch) {
 	var decls []ast.Node
 	for _, decl := range file.Decls {
 		decls = append(decls, decl)
 	}
 	for _, node := range FilterAstNodes(filter, decls) {
-		matches = append(matches, FilterMatch{
+		matches = append(matches, &FilterMatch{
 			File: file,
 			Node: node,
 		})
@@ -44,7 +44,7 @@ func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) (matches []Fil
 	return
 }
 
-func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]FilterMatch, error) {
+func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]*FilterMatch, error) {
 	pkgs, err := PackagesFromPatterns(patterns...)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]Fil
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []FilterMatch, err error) {
+func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []*FilterMatch, err error) {
 	mode := parser.ParseComments
 	for _, pkg := range pkgs.pkgs {
 		for _, goFile := range pkg.GoFiles {
@@ -62,7 +62,7 @@ func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []FilterM
 			}
 			matches := FilterAstNodesFromFile(filter, file)
 			for _, match := range matches {
-				(&match).GoFile = goFile
+				match.GoFile = goFile
 			}
 			filtered = append(filtered, matches...)
 		}
