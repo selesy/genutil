@@ -8,8 +8,9 @@ import (
 type AstNodeFilter func(node ast.Node) bool
 
 type FilterMatch struct {
-	File *ast.File
-	Node ast.Node
+	File   *ast.File
+	GoFile string
+	Node   ast.Node
 }
 
 func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast.Node) {
@@ -60,6 +61,9 @@ func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []FilterM
 				return nil, err
 			}
 			matches := FilterAstNodesFromFile(filter, file)
+			for _, match := range matches {
+				match.GoFile = goFile
+			}
 			filtered = append(filtered, matches...)
 		}
 	}
