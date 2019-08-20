@@ -62,7 +62,7 @@ func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []FilterM
 			}
 			matches := FilterAstNodesFromFile(filter, file)
 			for _, match := range matches {
-				match.GoFile = goFile
+				(&match).GoFile = goFile
 			}
 			filtered = append(filtered, matches...)
 		}
