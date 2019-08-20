@@ -7,7 +7,12 @@ import (
 
 type AstNodeFilter func(node ast.Node) bool
 
-func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast.Node, err error) {
+type FilterMatch struct {
+	File *ast.File
+	Node ast.Node
+}
+
+func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast.Node) {
 	for _, node := range unfiltered {
 		if filter(node) {
 			filtered = append(filtered, node)
@@ -15,7 +20,7 @@ func FilterAstNodes(filter AstNodeFilter, unfiltered []ast.Node) (filtered []ast
 	}
 	return
 }
-func FilterAstNodesFromArgs(filter AstNodeFilter) ([]ast.Node, error) {
+func FilterAstNodesFromArgs(filter AstNodeFilter) ([]FilterMatch, error) {
 	pkgs, err := PackagesFromArgs()
 	if err != nil {
 		return nil, err
@@ -24,24 +29,29 @@ func FilterAstNodesFromArgs(filter AstNodeFilter) ([]ast.Node, error) {
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) ([]ast.Node, error) {
+func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) (matches []FilterMatch) {
 	var decls []ast.Node
 	for _, decl := range file.Decls {
 		decls = append(decls, decl)
 	}
-	return FilterAstNodes(filter, decls)
+	for _, node := range FilterAstNodes(filter, decls) {
+		matches = append(matches, FilterMatch{
+			File: file,
+			Node: node,
+		})
+	}
+	return
 }
 
-func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]ast.Node, error) {
+func FilterAstNodesFromPatterns(filter AstNodeFilter, patterns ...string) ([]FilterMatch, error) {
 	pkgs, err := PackagesFromPatterns(patterns...)
 	if err != nil {
 		return nil, err
 	}
-
 	return FilterAstNodesFromPkgs(filter, pkgs)
 }
 
-func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []ast.Node, err error) {
+func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []FilterMatch, err error) {
 	mode := parser.ParseComments
 	for _, pkg := range pkgs.pkgs {
 		for _, goFile := range pkg.GoFiles {
@@ -49,11 +59,8 @@ func FilterAstNodesFromPkgs(filter AstNodeFilter, pkgs Pkgs) (filtered []ast.Nod
 			if err != nil {
 				return nil, err
 			}
-			nodes, err := FilterAstNodesFromFile(filter, file)
-			if err != nil {
-				return nil, err
-			}
-			filtered = append(filtered, nodes...)
+			matches := FilterAstNodesFromFile(filter, file)
+			filtered = append(filtered, matches...)
 		}
 	}
 	return
