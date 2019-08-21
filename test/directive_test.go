@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	// "golang.org/x/tools/go/packages"
-	genutil "github.com/selesy/go-genutil/pkg"
+	"github.com/selesy/go-genutil/pkg/genutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
