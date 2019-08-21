@@ -1,5 +1,15 @@
 package genutil
 
+import (
+	"errors"
+	"strings"
+)
+
+const (
+	goSuffix    = ".go"
+	goGenSuffix = "_gen.go"
+)
+
 //GoFilesFromPkgs returns the list of files that were parsed when loading
 //the packages and are therefore included in the FileSet.
 func GoFilesFromPkgs(pkgs Pkgs) (files []string) {
@@ -23,4 +33,11 @@ func GoFilesFromArgs() ([]string, error) {
 		return nil, err
 	}
 	return GoFilesFromPkgs(pkgs), nil
+}
+
+func GeneratedGoFileName(goFile string) (string, error) {
+	if !strings.HasSuffix(goFile, goSuffix) {
+		return "", errors.New("This method is expecting the name of a .go file")
+	}
+	return goFile[0:strings.LastIndex(goFile, goSuffix)] + goGenSuffix, nil
 }
