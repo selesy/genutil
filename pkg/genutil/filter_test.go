@@ -15,7 +15,7 @@ func TestNoneFiltered(t *testing.T) {
 		return true
 	}
 
-	nodes, err := FilterAstNodesFromPatterns(trueFilter, "../../_example")
+	nodes, err := FilterAstNodesFromPatterns(trueFilter, "../../examples")
 	if err != nil {
 		log.Error(err)
 		assert.Error(err)
@@ -30,7 +30,7 @@ func TestAllFiltered(t *testing.T) {
 		return false
 	}
 
-	nodes, err := FilterAstNodesFromPatterns(falseFilter, "../../_example")
+	nodes, err := FilterAstNodesFromPatterns(falseFilter, "../../examples")
 	if err != nil {
 		log.Error(err)
 		assert.Error(err)
@@ -45,7 +45,7 @@ func TestStructFiltered(t *testing.T) {
 		return true //TODO - filter some of the incoming nodes
 	}
 
-	nodes, err := FilterAstNodesFromPatterns(structArrayFilter, "../../_example")
+	nodes, err := FilterAstNodesFromPatterns(structArrayFilter, "../../examples")
 	if err != nil {
 		log.Error(err)
 		assert.Error(err)
