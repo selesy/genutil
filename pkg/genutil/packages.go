@@ -1,6 +1,7 @@
 package genutil
 
 import (
+	"flag"
 	"go/token"
 
 	"golang.org/x/tools/go/packages"
@@ -60,6 +61,8 @@ func PackagesFromPatterns(patterns ...string) (Pkgs, error) {
 }
 
 func PackagesFromArgs() (Pkgs, error) {
-	pkgArgs := NonFlagArgs()
-	return PackagesFromPatterns(pkgArgs...)
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+	return PackagesFromPatterns(flag.Args()...)
 }
