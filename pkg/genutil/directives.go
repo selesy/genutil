@@ -42,11 +42,13 @@ type Config struct {
 	ValueSeparator      string
 }
 
-var DefaultConfig = Config{
-	KeywordSeparator:    "-",
-	KeyValueSeparator:   ":",
-	TrimValueWhitespace: true,
-	ValueSeparator:      ",",
+func DefaultConfig() Config {
+	return Config{
+		KeywordSeparator:    "-",
+		KeyValueSeparator:   ":",
+		TrimValueWhitespace: true,
+		ValueSeparator:      ",",
+	}
 }
 
 func CommentGroup(node *ast.GenDecl, prefix string, cfg Config) (Directives, error) {
@@ -72,7 +74,7 @@ func CommentGroup(node *ast.GenDecl, prefix string, cfg Config) (Directives, err
 }
 
 func CommentGroupWithDefaultConfig(node *ast.GenDecl, prefix string) (Directives, error) {
-	return CommentGroup(node, prefix, DefaultConfig)
+	return CommentGroup(node, prefix, DefaultConfig())
 }
 
 func identToString(idents ...*ast.Ident) []string {
@@ -116,7 +118,7 @@ func StructFieldTags(node *ast.StructType, prefix string, cfg Config) (Directive
 }
 
 func StructFieldTagsWithDefaultConfig(node *ast.StructType, prefix string) (Directives, error) {
-	return StructFieldTags(node, prefix, DefaultConfig)
+	return StructFieldTags(node, prefix, DefaultConfig())
 }
 
 func (d Directives) UniqueDirective(node *ast.Node, suffix string) (string, error) {
