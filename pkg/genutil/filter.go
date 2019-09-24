@@ -31,7 +31,7 @@ func FilterAstNodesFromArgs(filter AstNodeFilter) ([]*FilterMatch, error) {
 }
 
 func FilterAstNodesFromFile(filter AstNodeFilter, file *ast.File) (matches []*FilterMatch) {
-	var decls []ast.Node
+	decls := []ast.Node{}
 	for _, decl := range file.Decls {
 		decls = append(decls, decl)
 	}

@@ -37,7 +37,7 @@ func GoFilesFromArgs() ([]string, error) {
 
 func GeneratedGoFileName(goFile string) (string, error) {
 	if !strings.HasSuffix(goFile, goSuffix) {
-		return "", errors.New("This method is expecting the name of a .go file")
+		return "", errors.New("this method is expecting the name of a .go file")
 	}
 	return goFile[0:strings.LastIndex(goFile, goSuffix)] + goGenSuffix, nil
 }
