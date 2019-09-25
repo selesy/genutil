@@ -41,7 +41,7 @@ func (pkgs Pkgs) Patterns() []string {
 //by searching the provided package patterns.
 func AddPackagesToFileSet(fset *token.FileSet, patterns ...string) (pkgs Pkgs, err error) {
 	cfg := packages.Config{
-		Mode: packages.NeedSyntax,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedFiles | packages.NeedSyntax,
 		Fset: fset,
 	}
 
